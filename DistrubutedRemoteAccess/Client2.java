@@ -1,0 +1,43 @@
+import java.io.*;
+import java.net.*;
+import java.util.Scanner;
+
+public class Client2 {
+    public static void main(String[] args) {
+        String host = "host.docker.internal";
+        int port = 5003;
+        Scanner scanner = new Scanner(System.in);
+        String name = "";
+        while (name.trim().isEmpty()) {
+            System.out.print("Enter your name: ");
+            name = scanner.nextLine();
+        }
+        try (Socket socket = new Socket(host, port);
+             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+             PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
+            out.println(name); // Send name to server
+            System.out.println("[Client2] Connected to server at " + host + ":" + port);
+
+            Thread readerThread = new Thread(() -> {
+                String line;
+                try {
+                    while ((line = in.readLine()) != null) {
+                        System.out.println(line);
+                    }
+                } catch (IOException e) {
+                    System.out.println("[Client2] Disconnected from server.");
+                }
+            });
+            readerThread.start();
+
+            while (true) {
+                String msg = scanner.nextLine();
+                if (msg.equalsIgnoreCase("exit")) break;
+                out.println(msg);
+            }
+            socket.close();
+        } catch (IOException e) {
+            System.err.println("[Client2] Error: " + e.getMessage());
+        }
+    }
+}

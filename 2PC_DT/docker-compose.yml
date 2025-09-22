@@ -1,0 +1,33 @@
+version: '3'
+services:
+  participant1:
+    build: .
+    command: ["java", "Participant", "5001"]
+    networks:
+      - twopcnet
+
+  participant2:
+    build: .
+    command: ["java", "Participant", "5002"]
+    networks:
+      - twopcnet
+
+  participant3:
+    build: .
+    command: ["java", "Participant", "5003"]
+    networks:
+      - twopcnet
+
+  coordinator:
+    build: .
+    command: ["java", "Coordinator"]
+    depends_on:
+      - participant1
+      - participant2
+      - participant3
+    networks:
+      - twopcnet
+
+networks:
+  twopcnet:
+    driver: bridge
